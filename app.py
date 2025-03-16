@@ -10,7 +10,6 @@ def generate_qr():
     if request.method == "POST":
         data = request.form['text']
         qr = qrcode.make(data)
-
         # Save the QR code to a BytesIO object
         img_io = BytesIO()
         qr.save(img_io, 'PNG')

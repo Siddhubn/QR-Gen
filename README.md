@@ -18,6 +18,20 @@ pip install flask qrcode
 ## Project Structure
 ```
 QR_Code_Gen/
+├── LICENSE
+├── README.md
+├── __pycache__
+    └── app.cpython-312.pyc
+├── app.py
+├── requirements.txt
+├── templates
+    └── index.html
+└── venv
+    ├── Lib
+        └── site-packages
+    ├── Scripts
+ 
+    └── pyvenv.cfg
 
 ```
 

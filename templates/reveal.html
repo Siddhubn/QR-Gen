@@ -3,33 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Your Time-Based Message</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(to bottom, #1a1a1a, #ff6600);
-            color: white;
-            text-align: center;
-            padding: 50px;
-        }
-        .message-box {
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 500px;
-            margin: auto;
-            box-shadow: 0 0 15px #ff6600;
-        }
-        h1 {
-            color: #ff6600;
-        }
+        :root{--orange:#ff6600}
+        body{margin:0;font-family:Segoe UI,Helvetica,Arial,sans-serif;
+             background:linear-gradient(to bottom,#121212,var(--orange));
+             color:#fff;display:flex;justify-content:center;align-items:center;
+             min-height:100vh;text-align:center;padding:2rem}
+        .msg{background:#000000b3;padding:2.5rem 3rem;border-radius:14px;
+             box-shadow:0 0 18px var(--orange)}
+        h1{color:var(--orange);font-size:1.9rem;margin:0 0 1rem}
+        a{color:#ffddb3}
     </style>
 </head>
 <body>
-    <div class="message-box">
-        <h1>🔮 Your Message</h1>
-        <p style="font-size: 1.3em;">{{ message }}</p>
-        <p><a href="/" style="color: #ffcc99;">← Back to Generator</a></p>
+    <div class="msg">
+        <h1>{{ message }}</h1>
+        <p><a href="/">← Back to generator</a></p>
     </div>
 </body>
 </html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><title>Scan Logs</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+ body{font-family:Segoe UI,sans-serif;background:#1a1a1a;color:#fff;padding:40px}
+ table{width:100%;border-collapse:collapse;margin-top:20px;font-size:0.9em}
+ th,td{padding:8px;border-bottom:1px solid #444}
+ th{background:#ff6600}
+ tr:hover{background:#2b2b2b}
+ a{color:#ffcc99}
+</style></head><body>
+<h1>📊 Last 200 Scans</h1>
+<table>
+  <tr><th>ID</th><th>Timestamp (UTC)</th><th>IP</th><th>UA (trunc.)</th><th>Weekday</th><th>Hour</th><th>Message sent</th></tr>
+  {% for r in rows %}
+    <tr>
+     <td>{{r.id}}</td><td>{{r.ts}}</td><td>{{r.ip}}</td><td>{{r.ua}}</td>
+     <td>{{r.weekday}}</td><td>{{r.hour}}</td><td>{{r.delivered_msg}}</td>
+    </tr>
+  {% endfor %}
+</table>
+<p><a href="/">← Back</a></p>
+</body></html>

@@ -81,7 +81,6 @@ def generate_qr():
         max_uses   – integer ≥1
     """
     if request.method == "POST":
-<<<<<<< HEAD
         fg = request.form.get("fg_color", "#000000")
         bg = request.form.get("bg_color", "#ffffff")
         password = request.form.get("password", "").strip()
@@ -92,14 +91,6 @@ def generate_qr():
 
         # Generate a short token
         token = uuid.uuid4().hex[:10]
-=======
-        data = request.form['text']
-        qr = qrcode.make(data)
-        # Save the QR code to a BytesIO object
-        img_io = BytesIO()
-        qr.save(img_io, 'PNG')
-        img_io.seek(0)
->>>>>>> a6898185a1a84bb6f689a51b829f678a44df4489
 
         # Save token metadata
         with sqlite3.connect(DB_PATH) as con:

@@ -7,7 +7,7 @@ Features
 4.  Scan logs (SQLite) + simple /logs viewer
 """
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import qrcode
 from io import BytesIO
 import base64, sqlite3, os, uuid
@@ -70,6 +70,44 @@ init_db()
 # --------------------------------------------------------------------------- #
 #  Routes                                                                      #
 # --------------------------------------------------------------------------- #
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    qr_code = None
+    qr_link = None
+
+    if request.method == 'POST':
+        message = request.form.get('message')  # ✅ message or URL
+        fg_color = request.form.get('fg_color') or "#000000"
+        bg_color = request.form.get('bg_color') or "#ffffff"
+        password = request.form.get('password')
+        max_uses = int(request.form.get('max_uses') or 1)
+
+        token = str(uuid.uuid4())
+        qr_link = url_for('reveal_token', token=token, _external=True)
+
+        # Store token + message
+        with sqlite3.connect('data.db') as conn:
+            c = conn.cursor()
+            c.execute('''
+                INSERT INTO messages (token, message, password, max_uses, scans)
+                VALUES (?, ?, ?, ?, 0)
+            ''', (token, message, password, max_uses))
+            conn.commit()
+
+        # Generate QR code linking to the reveal endpoint
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
+        qr.add_data(qr_link)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color=fg_color, back_color=bg_color)
+
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        qr_code = img_base64
+
+    return render_template('index.html', qr_code=qr_code, qr_link=qr_link)
+
 @app.route("/", methods=["GET", "POST"])
 def generate_qr():
     """

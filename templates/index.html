@@ -25,25 +25,30 @@
 <body>
     <h1>🎨 Build Your Own QR Code</h1>
 
-    <form method="POST">
-        <label>Foreground&nbsp;Colour
-            <input type="color" name="fg_color" value="#000000">
-        </label>
+   <form method="POST">
+    <label>Message or Link to Encode
+        <input type="text" name="message" placeholder="e.g. https://example.com" required>
+    </label>
 
-        <label>Background&nbsp;Colour
-            <input type="color" name="bg_color" value="#ffffff">
-        </label>
+    <label>Foreground Colour
+        <input type="color" name="fg_color" value="#000000">
+    </label>
 
-        <label>Password&nbsp;(optional)
-            <input type="text" name="password" placeholder="leave blank for none">
-        </label>
+    <label>Background Colour
+        <input type="color" name="bg_color" value="#ffffff">
+    </label>
 
-        <label>Max&nbsp;Uses
-            <input type="number" name="max_uses" value="1" min="1">
-        </label>
+    <label>Password (optional)
+        <input type="text" name="password" placeholder="leave blank for none">
+    </label>
 
-        <button type="submit">Generate QR</button>
-    </form>
+    <label>Max Uses
+        <input type="number" name="max_uses" value="1" min="1">
+    </label>
+
+    <button type="submit">Generate QR</button>
+</form>
+
 
     {% if qr_code %}
         <div style="margin-top:3rem">

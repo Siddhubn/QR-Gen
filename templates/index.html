@@ -1,193 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Custom Time-Travel QR Generator</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QR Code Generator</title>
     <style>
-        :root{
-            --accent:#ff6600;
-            --accent-dark:#cc5200;
-            --bg1:#0d0d0d;
-            --bg2:#202020;
-            --glass:rgba(255,255,255,.06);
+        /* Reset & base */
+        * {
+            box-sizing: border-box;
         }
-
-        /* ---------- base ---------- */
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{
-            font-family:'Poppins',sans-serif;
-            min-height:100vh;
-            background:#000;
-            background:linear-gradient(135deg,var(--bg1),var(--bg2));
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            padding:2rem;
-            overflow-x:hidden;
+        body {
+            background: linear-gradient(135deg, #1e1e2f, #282c34);
+            color: #eee;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; padding: 0;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem;
         }
-
-        /* animated aurora stripes */
-        .bg-anim{
-            position:fixed;inset:0;z-index:-1;
-            pointer-events:none;
+        h1 {
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #61dafb;
+            text-shadow: 0 0 8px #61dafb44;
         }
-        .stripe{
-            position:absolute;
-            width:160%;
-            height:400px;
-            background:linear-gradient(120deg,transparent 10%,var(--accent)55%,transparent 90%);
-            filter:blur(90px) opacity(.18);
-            animation:move 12s linear infinite;
+        form {
+            background: #2a2e3d;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 0 15px #000000aa;
+            transition: box-shadow 0.3s ease-in-out;
         }
-        .stripe:nth-child(2){animation-delay:-4s;filter:blur(110px) opacity(.12);}
-        .stripe:nth-child(3){animation-delay:-8s;filter:blur(130px) opacity(.1);}
-        @keyframes move{
-            0%{transform:translateX(-30%) rotate(-12deg);}
-            100%{transform:translateX(30%) rotate(-12deg);}
+        form:hover {
+            box-shadow: 0 0 25px #61dafbcc;
         }
-
-        /* ---------- card ---------- */
-        .card{
-            width:clamp(300px, 90vw, 420px);
-            padding:2.5rem 2.75rem;
-            border-radius:20px;
-            background:var(--glass);
-            backdrop-filter:blur(14px);
-            border:1px solid rgba(255,255,255,.08);
-            box-shadow:0 35px 45px -25px rgba(0,0,0,.6);
-            animation:drop 1s ease forwards;
-            opacity:0;
+        label {
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+            color: #a0a8c0;
         }
-        @keyframes drop{
-            0%{transform:translateY(-40px) scale(.96);opacity:0}
-            100%{transform:translateY(0) scale(1);opacity:1}
+        input[type="email"],
+        input[type="text"],
+        input[type="number"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            background: #1e2028;
+            color: #eee;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: background-color 0.3s ease;
         }
-
-        h1{
-            font-size:1.8rem;
-            font-weight:600;
-            margin-bottom:1.2rem;
-            color:#fff;
+        input[type="email"]:focus,
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="password"]:focus,
+        textarea:focus {
+            background: #2f3241;
         }
-
-        label{
-            display:block;
-            margin-top:1.15rem;
-            font-size:.95rem;
-            font-weight:500;
-            color:#ddd;
+        textarea {
+            resize: vertical;
+            min-height: 80px;
         }
-        input,button{
-            width:100%;
-            margin-top:.55rem;
-            padding:.68rem 1rem;
-            font-size:1rem;
-            font-family:inherit;
-            border:none;
-            border-radius:10px;
-            outline:none;
-            transition:.25s;
+        button {
+            background: #61dafb;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-weight: 700;
+            color: #20232a;
+            cursor: pointer;
+            font-size: 1.1rem;
+            width: 100%;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 0 12px #61dafb88;
         }
-        input{
-            background:rgba(255,255,255,.09);
-            color:#fff;
+        button:hover {
+            background: #21a1f1;
+            box-shadow: 0 0 20px #21a1f188;
         }
-        input::placeholder{color:#aaa;}
-
-        input[type=color]{
-            padding:.3rem;
-            height:48px;
+        .qr-container {
+            margin-top: 2rem;
+            text-align: center;
         }
-
-        button{
-            margin-top:1.6rem;
-            background:var(--accent);
-            color:#fff;
-            font-weight:600;
-            letter-spacing:.5px;
-            cursor:pointer;
-            box-shadow:0 8px 18px -6px var(--accent);
-            transform:translateY(0);
+        .qr-container img {
+            width: 250px;
+            height: 250px;
+            border-radius: 16px;
+            box-shadow: 0 0 15px #61dafbaa;
+            animation: fadeIn 0.6s ease forwards;
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
-        button:hover{background:var(--accent-dark);box-shadow:0 10px 20px -6px var(--accent-dark);}
-        button:active{transform:translateY(2px);}
-
-        /* ---------- result ---------- */
-        .result{
-            margin-top:2.2rem;
-            animation:fadeIn .9s ease .2s forwards;
-            opacity:0;
+        .qr-container img:hover {
+            transform: scale(1.05);
         }
-        @keyframes fadeIn{to{opacity:1}}
-        img{
-            width:230px;
-            max-width:70%;
-            border:4px solid var(--accent);
-            border-radius:14px;
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(20px);}
+            to {opacity: 1; transform: translateY(0);}
         }
-        a{
-            color:#ffdfbb;
-            word-break:break-all;
+        .download-btn {
+            margin-top: 1rem;
+            background: #21a1f1;
+            box-shadow: 0 0 12px #21a1f188;
         }
-        p{margin-top:.9rem;font-size:.9rem;color:#ccc}
-
-        @media(prefers-reduced-motion:reduce){
-            *{animation:none!important}
+        .download-btn:hover {
+            background: #0d8cd7;
+            box-shadow: 0 0 20px #0d8cd788;
         }
+        .info-text {
+            color: #8fa0b3;
+            font-size: 0.9rem;
+            margin-top: -0.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .color-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .color-inputs label {
+            flex: 1;
+        }
+        .color-inputs input[type="color"] {
+            width: 100%;
+            height: 40px;
+            padding: 0;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .max-uses {
+            width: 100px;
+            display: block;
+            margin-bottom: 1rem;
+        }
+        .flash {
+            background: #ff4d4d;
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 0 12px #ff4d4d88;
+            animation: shake 0.3s ease;
+        }
+        @keyframes shake {
+            0%, 100% {transform: translateX(0);}
+            20%, 60% {transform: translateX(-8px);}
+            40%, 80% {transform: translateX(8px);}
+        }
+        /* reCAPTCHA container (commented out) */
+        /*
+        .g-recaptcha {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+        }
+        */
     </style>
 </head>
 <body>
 
-    <!-- animated backdrop stripes -->
-    <div class="bg-anim">
-        <div class="stripe"></div>
-        <div class="stripe"></div>
-        <div class="stripe"></div>
-    </div>
+    <h1>Generate Your Email / Message QR Code</h1>
 
-    <div class="card">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
-        <h1>✨ Custom QR Generator</h1>
+    <form method="POST" action="{{ url_for('index') }}">
+        <label for="email">Email (optional):</label>
+        <input type="email" id="email" name="email" placeholder="example@example.com" autocomplete="off" />
 
-        <form method="POST">
-            <label>Message / Link to encode
-                <input type="text" name="message" placeholder="https://example.com" required>
+        <label for="message">Message (optional):</label>
+        <textarea id="message" name="message" placeholder="Enter a message to encode"></textarea>
+
+        <div class="color-inputs">
+            <label for="fg_color">Foreground Color:
+                <input type="color" id="fg_color" name="fg_color" value="#000000" />
             </label>
-
-            <label>Foreground colour
-                <input type="color" name="fg_color" value="#000000">
+            <label for="bg_color">Background Color:
+                <input type="color" id="bg_color" name="bg_color" value="#ffffff" />
             </label>
-
-            <label>Background colour
-                <input type="color" name="bg_color" value="#ffffff">
-            </label>
-
-            <label>Password (optional)
-                <input type="text" name="password" placeholder="leave blank for none">
-            </label>
-
-            <label>Max uses
-                <input type="number" name="max_uses" value="1" min="1">
-            </label>
-
-            <button type="submit">Generate QR</button>
-        </form>
-
-        {% if qr_code %}
-        <div class="result">
-            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
-            <p><strong>Scan URL:</strong><br>
-               <a href="{{ qr_link }}">{{ qr_link }}</a></p>
-            <p><em>Share the PNG or the link above.</em></p>
         </div>
-        {% endif %}
 
+        <label for="password">Password (optional):</label>
+        <input type="password" id="password" name="password" placeholder="Set a password to protect QR" autocomplete="new-password" />
+
+        <label for="max_uses">Max Uses:</label>
+        <input type="number" id="max_uses" name="max_uses" min="1" max="100" value="1" class="max-uses" />
+
+        <!--
+        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+        Uncomment above div and the corresponding captcha check in app.py to enable CAPTCHA
+        -->
+
+        <button type="submit" title="Generate QR Code">Generate QR Code</button>
+    </form>
+
+    {% if qr_code %}
+    <div class="qr-container" aria-live="polite">
+        <h2>Your QR Code</h2>
+        <img src="data:image/png;base64,{{ qr_code }}" alt="Generated QR Code" />
+        <a href="{{ url_for('download_qr', token=download_token) }}" download>
+            <button class="download-btn" aria-label="Download QR code PNG">Download QR Code</button>
+        </a>
+        <p class="info-text">Scan this QR code to open your email/message link.</p>
     </div>
+    {% endif %}
+
+    <!-- Google reCAPTCHA script - comment out for now -->
+    <!-- <script src="https://www.google.com/recaptcha/api.js" async defer></script> -->
 
 </body>
 </html>

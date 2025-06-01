@@ -1,235 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* Reset & base */
-        * {
-            box-sizing: border-box;
-        }
         body {
-            background: linear-gradient(135deg, #1e1e2f, #282c34);
-            color: #eee;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0; padding: 0;
-            display: flex;
-            min-height: 100vh;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 2rem;
-        }
-        h1 {
-            font-weight: 700;
-            letter-spacing: 1.2px;
-            margin-bottom: 1rem;
-            text-align: center;
-            color: #61dafb;
-            text-shadow: 0 0 8px #61dafb44;
-        }
-        form {
-            background: #2a2e3d;
-            padding: 2rem;
-            border-radius: 12px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 0 15px #000000aa;
-            transition: box-shadow 0.3s ease-in-out;
-        }
-        form:hover {
-            box-shadow: 0 0 25px #61dafbcc;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.25rem;
-            font-weight: 600;
-            color: #a0a8c0;
-        }
-        input[type="email"],
-        input[type="text"],
-        input[type="number"],
-        input[type="password"],
-        textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            background: #1e2028;
-            color: #eee;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: background-color 0.3s ease;
-        }
-        input[type="email"]:focus,
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        input[type="password"]:focus,
-        textarea:focus {
-            background: #2f3241;
-        }
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        button {
-            background: #61dafb;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 25px;
-            font-weight: 700;
-            color: #20232a;
-            cursor: pointer;
-            font-size: 1.1rem;
-            width: 100%;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 0 12px #61dafb88;
-        }
-        button:hover {
-            background: #21a1f1;
-            box-shadow: 0 0 20px #21a1f188;
-        }
-        .qr-container {
-            margin-top: 2rem;
-            text-align: center;
-        }
-        .qr-container img {
-            width: 250px;
-            height: 250px;
-            border-radius: 16px;
-            box-shadow: 0 0 15px #61dafbaa;
-            animation: fadeIn 0.6s ease forwards;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        .qr-container img:hover {
-            transform: scale(1.05);
-        }
-        @keyframes fadeIn {
-            from {opacity: 0; transform: translateY(20px);}
-            to {opacity: 1; transform: translateY(0);}
-        }
-        .download-btn {
-            margin-top: 1rem;
-            background: #21a1f1;
-            box-shadow: 0 0 12px #21a1f188;
-        }
-        .download-btn:hover {
-            background: #0d8cd7;
-            box-shadow: 0 0 20px #0d8cd788;
-        }
-        .info-text {
-            color: #8fa0b3;
-            font-size: 0.9rem;
-            margin-top: -0.5rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-        .color-inputs {
-            display: flex;
-            gap: 10px;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-        .color-inputs label {
-            flex: 1;
-        }
-        .color-inputs input[type="color"] {
-            width: 100%;
-            height: 40px;
-            padding: 0;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-        }
-        .max-uses {
-            width: 100px;
-            display: block;
-            margin-bottom: 1rem;
-        }
-        .flash {
-            background: #ff4d4d;
-            padding: 0.7rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            font-weight: 600;
-            text-align: center;
-            box-shadow: 0 0 12px #ff4d4d88;
-            animation: shake 0.3s ease;
-        }
-        @keyframes shake {
-            0%, 100% {transform: translateX(0);}
-            20%, 60% {transform: translateX(-8px);}
-            40%, 80% {transform: translateX(8px);}
-        }
-        /* reCAPTCHA container (commented out) */
-        /*
-        .g-recaptcha {
-            margin-bottom: 1rem;
+            font-family: 'Poppins', sans-serif;
             display: flex;
             justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1a1a1a, #ff6600);
+            overflow: hidden;
         }
-        */
+        .container {
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            background: rgba(30, 30, 30, 0.9);
+            box-shadow: 0 0 20px rgba(255, 102, 0, 0.6);
+            color: white;
+            width: 400px;
+            max-width: 90%;
+        }
+        h1 {
+            color: #ff6600;
+        }
+        input[type="text"] {
+            padding: 12px;
+            font-size: 16px;
+            width: 90%;
+            margin: 15px 0;
+            border-radius: 5px;
+            border: none;
+            background: #222;
+            color: white;
+            text-align: center;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            background-color: #ff6600;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #cc5200;
+        }
+        .shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .shapes div {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 102, 0, 0.5);
+            border-radius: 50%;
+            animation: moveShapes 20s infinite linear;
+        }
+        @keyframes moveShapes {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(100px) rotate(180deg); }
+            100% { transform: translateY(0px) rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-
-    <h1>Generate Your Email / Message QR Code</h1>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    <form method="POST" action="{{ url_for('index') }}">
-        <label for="email">Email (optional):</label>
-        <input type="email" id="email" name="email" placeholder="example@example.com" autocomplete="off" />
-
-        <label for="message">Message (optional):</label>
-        <textarea id="message" name="message" placeholder="Enter a message to encode"></textarea>
-
-        <div class="color-inputs">
-            <label for="fg_color">Foreground Color:
-                <input type="color" id="fg_color" name="fg_color" value="#000000" />
-            </label>
-            <label for="bg_color">Background Color:
-                <input type="color" id="bg_color" name="bg_color" value="#ffffff" />
-            </label>
-        </div>
-
-        <label for="password">Password (optional):</label>
-        <input type="password" id="password" name="password" placeholder="Set a password to protect QR" autocomplete="new-password" />
-
-        <label for="max_uses">Max Uses:</label>
-        <input type="number" id="max_uses" name="max_uses" min="1" max="100" value="1" class="max-uses" />
-
-        <!--
-        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
-        Uncomment above div and the corresponding captcha check in app.py to enable CAPTCHA
-        -->
-
-        <button type="submit" title="Generate QR Code">Generate QR Code</button>
-    </form>
-
-    {% if qr_code %}
-    <div class="qr-container" aria-live="polite">
-        <h2>Your QR Code</h2>
-        <img src="data:image/png;base64,{{ qr_code }}" alt="Generated QR Code" />
-        <a href="{{ url_for('download_qr', token=download_token) }}" download>
-            <button class="download-btn" aria-label="Download QR code PNG">Download QR Code</button>
-        </a>
-        <p class="info-text">Scan this QR code to open your email/message link.</p>
+    <div class="shapes">
+        <div style="top: 10%; left: 20%;"></div>
+        <div style="top: 50%; left: 70%;"></div>
+        <div style="top: 80%; left: 40%;"></div>
     </div>
-    {% endif %}
-
-    <!-- Google reCAPTCHA script - comment out for now -->
-    <!-- <script src="https://www.google.com/recaptcha/api.js" async defer></script> -->
-
+    <div class="container">
+        <h1>QR Code Generator</h1>
+        <form method="POST">
+            <input type="text" name="text" placeholder="Enter text for QR code" required>
+            <br>
+            <button type="submit">Generate QR Code</button>
+        </form>
+    </div>
 </body>
 </html>

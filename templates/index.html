@@ -6,28 +6,35 @@
     <title>QR Code Generator</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: 'Poppins', sans-serif;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            align-items: flex-start;
+            min-height: 100vh;
             background: linear-gradient(135deg, #1a1a1a, #ff6600);
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
         .container {
             text-align: center;
-            padding: 30px;
+            padding: 30px 20px;
             border-radius: 15px;
-            background: rgba(30, 30, 30, 0.9);
+            background: rgba(30, 30, 30, 0.95);
             box-shadow: 0 0 20px rgba(255, 102, 0, 0.6);
             color: white;
-            width: 400px;
-            max-width: 90%;
+            width: 420px;
+            max-width: 98vw;
+            margin: 40px auto 40px auto;
         }
         h1 {
             color: #ff6600;
+            font-size: 2.1rem;
         }
         input[type="text"] {
             padding: 12px;
@@ -54,11 +61,11 @@
             background-color: #cc5200;
         }
         .shapes {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             overflow: hidden;
             z-index: -1;
         }
@@ -75,6 +82,108 @@
             50% { transform: translateY(100px) rotate(180deg); }
             100% { transform: translateY(0px) rotate(360deg); }
         }
+        /* Responsive QR grid */
+        #multi-results {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 32px 18px;
+            justify-items: center;
+            align-items: stretch;
+            /* Masonry effect for modern browsers */
+        }
+        .qr-card {
+            position: relative;
+            background: rgba(30,30,30,0.98);
+            border-radius: 22px;
+            box-shadow: 0 6px 32px 0 rgba(0,0,0,0.18), 0 0 0 4px var(--qr-color, #fff2);
+            padding: 22px 16px 18px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
+            overflow: visible;
+            min-height: 320px;
+        }
+        .qr-card:hover {
+            transform: scale(1.045) rotate(-2deg);
+            box-shadow: 0 12px 40px 0 var(--qr-color, #fff5), 0 0 0 8px var(--qr-color, #fff3);
+            z-index: 2;
+        }
+        .qr-label-badge {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--qr-color, #fff);
+            color: #222;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            border-radius: 16px;
+            padding: 6px 22px;
+            box-shadow: 0 2px 12px 0 var(--qr-color, #fff5);
+            border: 2px solid #fff;
+            text-shadow: 0 1px 2px #fff8;
+            transition: background 0.2s, color 0.2s;
+        }
+        .qr-card:hover .qr-label-badge {
+            background: #222;
+            color: var(--qr-color, #fff);
+            border-color: var(--qr-color, #fff);
+        }
+        .qr-img-glow {
+            box-shadow: 0 0 0 6px var(--qr-color, #fff3), 0 0 32px 0 var(--qr-color, #fff5);
+            border-radius: 12px;
+            background: #fff;
+            margin-bottom: 12px;
+            margin-top: 18px;
+            transition: box-shadow 0.2s;
+        }
+        .qr-card:hover .qr-img-glow {
+            box-shadow: 0 0 0 12px var(--qr-color, #fff4), 0 0 48px 0 var(--qr-color, #fff7);
+        }
+        .qr-text {
+            color: #fff;
+            font-size: 0.98rem;
+            margin-bottom: 10px;
+            word-break: break-all;
+            text-align: center;
+            opacity: 0.92;
+        }
+        .qr-download-btn {
+            background: var(--qr-color, #fff);
+            color: #222;
+            border-radius: 7px;
+            padding: 10px 22px;
+            font-weight:700;
+            font-size: 1rem;
+            margin-top: 10px;
+            border: none;
+            box-shadow: 0 2px 8px 0 var(--qr-color, #fff3);
+            transition: background 0.2s, color 0.2s;
+        }
+        .qr-download-btn:hover {
+            background: #222;
+            color: var(--qr-color, #fff);
+            border: 2px solid var(--qr-color, #fff);
+        }
+        @media (max-width: 900px) {
+            .container { width: 98vw; padding: 18px 2vw; }
+            #multi-results { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+            .qr-card { min-height: 250px; }
+        }
+        @media (max-width: 600px) {
+            .container { width: 100vw; border-radius: 0; box-shadow: none; padding: 10px 0; }
+            h1 { font-size: 1.3rem; }
+            #multi-results { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+            .qr-card { min-height: 180px; padding: 10px 4px 10px 4px; }
+            .qr-label-badge { font-size: 0.95rem; padding: 4px 10px; }
+        }
+        /* Make sure forms and buttons are touch-friendly */
+        input, button, select { font-size: 1rem; }
+        /* Allow scrolling for long content */
+        html, body { overflow-x: hidden; }
     </style>
 </head>
 <body>
@@ -85,11 +194,243 @@
     </div>
     <div class="container">
         <h1>QR Code Generator</h1>
-        <form method="POST">
-            <input type="text" name="text" placeholder="Enter text for QR code" required>
+        <div id="main-menu" style="display: flex; flex-direction: row; justify-content: center; gap: 18px; margin-bottom: 28px;">
+            <button id="single-btn" type="button" class="main-menu-btn">Single QR Generation</button>
+            <button id="multi-btn" type="button" class="main-menu-btn">Multi QR Generation</button>
+        </div>
+        <form id="single-form" method="POST" enctype="multipart/form-data" style="display:none;">
+            <input type="text" name="text" id="single-text" placeholder="Enter text for QR code" required>
             <br>
+            <!-- Collapsible: Custom QR Styling -->
+            <details style="margin:10px 0; text-align:left;">
+                <summary style="font-weight:600; color:#ff6600; cursor:pointer;">🎨 Custom QR Styling</summary>
+                <div style="margin:10px 0 0 0;">
+                    <label>QR Color: <input type="color" name="qr_color" id="qr_color" value="#000000"></label>
+                    <label style="margin-left:15px;">Background: <input type="color" name="bg_color" id="bg_color" value="#ffffff"></label>
+                    <br><br>
+                    <label>Style:
+                        <select name="qr_style" id="qr_style">
+                            <option value="square">Square</option>
+                            <option value="rounded">Rounded</option>
+                            <option value="dots">Dots</option>
+                        </select>
+                    </label>
+                </div>
+            </details>
+            <!-- Collapsible: Logo/Image Embedding -->
+            <details style="margin:10px 0; text-align:left;">
+                <summary style="font-weight:600; color:#ff6600; cursor:pointer;">🖼️ Embed Logo/Image</summary>
+                <div style="margin:10px 0 0 0;">
+                    <input type="file" name="logo" id="logo" accept="image/*">
+                    <small style="color:#aaa;">(Optional, PNG/JPG, small square recommended)</small>
+                </div>
+            </details>
+            <!-- Collapsible: Animated Reveal (handled by JS/CSS) -->
+            <!-- Collapsible: Instant Scan Test -->
+            <details style="margin:10px 0; text-align:left;">
+                <summary style="font-weight:600; color:#ff6600; cursor:pointer;">📷 Instant Scan Test</summary>
+                <div style="margin:10px 0 0 0;">
+                    <button type="button" id="start-scan" style="margin-bottom:8px;">Start Camera Scan</button>
+                    <div id="scanner" style="display:none; margin-top:10px;"></div>
+                    <div id="scan-result" style="margin-top:8px; color:#7cfc00;"></div>
+                </div>
+            </details>
             <button type="submit">Generate QR Code</button>
         </form>
+        <div id="multi-section" style="display:none;">
+            <button id="back-btn" type="button" style="margin-bottom: 15px;">&larr; Back</button>
+            <div style="margin-bottom: 15px;">
+                <label for="qr-count" style="font-weight:600;">How many QR codes?</label>
+                <select id="qr-count" name="qr_count" style="padding:8px; border-radius:5px; font-size:15px;">
+                    {% for i in range(1, 11) %}
+                    <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <form id="multi-form" method="POST">
+                <div id="multi-inputs"></div>
+                <button type="submit" style="margin-top:10px;">Generate Multiple QR Codes</button>
+                <input type="hidden" name="multi_mode" value="1">
+            </form>
+        </div>
+        {% if multi_qr_results %}
+        <div id="multi-results">
+            {% for qr in multi_qr_results %}
+            <div class="qr-card" style="--qr-color: {{ qr.color }};">
+                <div class="qr-label-badge">{{ qr.label }}</div>
+                <img class="qr-img-glow" src="data:image/png;base64,{{ qr.qr_img }}" alt="QR Code" style="max-width: 100%; padding: 10px; border-radius: 10px; border: 2px solid {{ qr.color }};" />
+                <div class="qr-text">{{ qr.text }}</div>
+                <a href="data:image/png;base64,{{ qr.qr_img }}" download="qr_code_{{ qr.label|lower }}.png">
+                    <button type="button" class="qr-download-btn">Download</button>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if qr_img_base64 %}
+        <div style="margin-top: 25px;">
+            <img id="qr-img" class="qr-animated" src="data:image/png;base64,{{ qr_img_base64 }}" alt="QR Code" style="max-width: 100%; background: white; padding: 10px; border-radius: 8px; animation: qrFadeIn 1s cubic-bezier(.4,2,.6,1);" />
+            <br>
+            <a id="download-btn" href="data:image/png;base64,{{ qr_img_base64 }}" download="qr_code.png">
+                <button type="button" style="margin-top: 15px;">Download</button>
+            </a>
+            <!-- Accessibility: Read QR Content -->
+            <div style="margin-top:18px;">
+                <button type="button" id="read-qr-text" data-qr-content="{{ text }}">🔊 Read QR Content</button>
+                <div id="qr-desc" style="margin-top:8px; color:#ffd700;"></div>
+            </div>
+            <!-- Share Options -->
+            <div style="margin-top:18px;">
+                <div style="font-size:1.08rem; color:#ffb300; font-weight:600; margin-bottom:7px;">Share your QR code:</div>
+                <button type="button" id="share-email" data-qr-content="{{ text }}">Email</button>
+                <button type="button" id="share-whatsapp" data-qr-content="{{ text }}">WhatsApp</button>
+                <button type="button" id="share-twitter" data-qr-content="{{ text }}">Twitter</button>
+            </div>
+        </div>
+        {% endif %}
     </div>
+    <style>
+    @keyframes qrFadeIn {
+        0% { opacity: 0; transform: scale(0.7) rotate(-10deg); }
+        60% { opacity: 1; transform: scale(1.1) rotate(2deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    .main-menu-btn {
+        flex: 1 1 0;
+        min-width: 160px;
+        max-width: 220px;
+        padding: 16px 0;
+        margin: 0;
+        font-size: 1.08rem;
+        font-weight: 600;
+        border-radius: 8px;
+        background: #ff6600;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px #ff660044;
+    }
+    .main-menu-btn:hover {
+        background: #cc5200;
+        box-shadow: 0 4px 16px #ff660055;
+    }
+    </style>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+    <script>
+    // Section toggling
+    const mainMenu = document.getElementById('main-menu');
+    const singleBtn = document.getElementById('single-btn');
+    const multiBtn = document.getElementById('multi-btn');
+    const singleForm = document.getElementById('single-form');
+    const multiSection = document.getElementById('multi-section');
+    const backBtn = document.getElementById('back-btn');
+    const multiInputs = document.getElementById('multi-inputs');
+    const qrCount = document.getElementById('qr-count');
+    const natureLabels = {{ nature_labels|tojson }};
+
+    function showSingle() {
+        mainMenu.style.display = 'none';
+        singleForm.style.display = 'block';
+        multiSection.style.display = 'none';
+    }
+    function showMulti() {
+        mainMenu.style.display = 'none';
+        singleForm.style.display = 'none';
+        multiSection.style.display = 'block';
+        renderMultiInputs();
+    }
+    function showMenu() {
+        mainMenu.style.display = 'block';
+        singleForm.style.display = 'none';
+        multiSection.style.display = 'none';
+    }
+    singleBtn.onclick = showSingle;
+    multiBtn.onclick = showMulti;
+    backBtn.onclick = showMenu;
+    qrCount.onchange = renderMultiInputs;
+
+    function renderMultiInputs() {
+        const count = parseInt(qrCount.value);
+        multiInputs.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            const [label, color] = natureLabels[i];
+            const div = document.createElement('div');
+            div.style.marginBottom = '12px';
+            div.innerHTML = `<label style="font-weight:600; color:${color};">${label}</label><br>
+                <input type="text" name="multi_text" placeholder="Enter ${label} text/link" class="multi-field" style="border:2px solid ${color}; background: #222; color: white; border-radius:5px; padding:10px; width:90%;" ${i===0?'required':''}>`;
+            multiInputs.appendChild(div);
+        }
+    }
+    // Show main menu on load
+    showMenu();
+
+    // Feature 6: Instant Scan Test
+    const startScanBtn = document.getElementById('start-scan');
+    const scannerDiv = document.getElementById('scanner');
+    const scanResult = document.getElementById('scan-result');
+    let html5Qr;
+    if (startScanBtn) {
+        startScanBtn.onclick = function() {
+            scannerDiv.style.display = 'block';
+            scanResult.textContent = '';
+            if (!html5Qr) {
+                html5Qr = new Html5Qrcode("scanner");
+            }
+            html5Qr.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 200 },
+                qrCodeMessage => {
+                    scanResult.textContent = 'Scanned: ' + qrCodeMessage;
+                    html5Qr.stop();
+                },
+                errorMessage => {}
+            ).catch(err => {
+                scanResult.textContent = 'Camera error: ' + err;
+            });
+        };
+    }
+
+    // Feature 7: Share Options (moved to after QR generation)
+    function getQRContentFromButton(btnId) {
+        const btn = document.getElementById(btnId);
+        return btn ? btn.getAttribute('data-qr-content') : '';
+    }
+    const shareEmailBtn = document.getElementById('share-email');
+    if (shareEmailBtn) {
+        shareEmailBtn.onclick = function() {
+            const subject = encodeURIComponent('Check out this QR code!');
+            const body = encodeURIComponent('Here is a QR code for you: ' + getQRContentFromButton('share-email'));
+            window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+        };
+    }
+    const shareWhatsAppBtn = document.getElementById('share-whatsapp');
+    if (shareWhatsAppBtn) {
+        shareWhatsAppBtn.onclick = function() {
+            const text = encodeURIComponent('Check out this QR code! ' + getQRContentFromButton('share-whatsapp'));
+            window.open('https://wa.me/?text=' + text, '_blank');
+        };
+    }
+    const shareTwitterBtn = document.getElementById('share-twitter');
+    if (shareTwitterBtn) {
+        shareTwitterBtn.onclick = function() {
+            const text = encodeURIComponent('Check out this QR code! ' + getQRContentFromButton('share-twitter'));
+            window.open('https://twitter.com/intent/tweet?text=' + text, '_blank');
+        };
+    }
+    // Feature 9: Accessibility (Read QR Content, moved to after QR generation)
+    const readBtn = document.getElementById('read-qr-text');
+    const qrDesc = document.getElementById('qr-desc');
+    if (readBtn) {
+        readBtn.onclick = function() {
+            const text = readBtn.getAttribute('data-qr-content') || '';
+            qrDesc.textContent = 'QR Content: ' + text;
+            if ('speechSynthesis' in window) {
+                const utter = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utter);
+            }
+        };
+    }
+    </script>
 </body>
 </html>

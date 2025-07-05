@@ -398,7 +398,7 @@
         }
         .main-menu-btn, .scan-btn, .verify-btn-primary, .verify-btn-secondary, .main-action-btn {
             margin: 0 8px 12px 8px;
-            padding-left: 18px;
+            padding: left: 18px;
             padding-right: 18px;
             box-sizing: border-box;
         }
@@ -495,6 +495,10 @@
                 {% else %}
                 <button type="button" class="qr-download-btn" disabled style="opacity:0.5; cursor:not-allowed;">Download (Unsafe)</button>
                 {% endif %}
+                <!-- Accessibility: Read QR Content for multi -->
+                <div style="margin-top:12px;">
+                  <button class="read-multi-qr-content" type="button" data-qr-content="{{ qr.text }}" style="background:#ffd700; color:#222; border-radius:6px; padding:7px 18px; font-weight:700;">🔊 Read QR Content</button>
+                </div>
             </div>
             {% endfor %}
         </div>
@@ -508,6 +512,12 @@
               <span style="color:#00ff88; font-size:0.98em; margin-left:8px;">{{ trust_result.score|capitalize }}</span>
               <span style="color:#ffd600; font-size:0.93em; margin-left:8px;">{{ trust_result.reason }}</span>
             </div>
+            <div style="margin: 10px 0; color:#ffd700; font-size:1.08em;">
+                <b>Decoded QR Content:</b> {{ decoded_data if decoded_data else text }}
+                {% if decoded_trust_result %}
+                    <br><span style="color:#00ff88;">Decoded Trust: {{ decoded_trust_result.score|capitalize }} - {{ decoded_trust_result.reason }}</span>
+                {% endif %}
+            </div>
             {% if trust_result.score == 'safe' %}
             <a id="download-btn" href="data:image/png;base64,{{ qr_img_base64 }}" download="qr_code.png">
                 <button type="button" style="margin-top: 15px;">Download</button>
@@ -517,15 +527,15 @@
             {% endif %}
             <!-- Accessibility: Read QR Content -->
             <div style="margin-top:18px;">
-                <button type="button" id="read-qr-text" data-qr-content="{{ text }}">🔊 Read QR Content</button>
-                <div id="qr-desc" style="margin-top:8px; color:#ffd700;"></div>
+                <button id="read-qr-content" type="button" style="background:#ffd700; color:#222; border-radius:6px; padding:7px 18px; font-weight:700;">🔊 Read QR Content</button>
             </div>
             <!-- Share Options -->
             <div style="margin-top:18px;">
                 <div style="font-size:1.08rem; color:#ffb300; font-weight:600; margin-bottom:7px;">Share your QR code:</div>
-                <button type="button" id="share-email" data-qr-content="{{ text }}">Email</button>
-                <button type="button" id="share-whatsapp" data-qr-content="{{ text }}">WhatsApp</button>
-                <button type="button" id="share-twitter" data-qr-content="{{ text }}">Twitter</button>
+                <button id="copy-qr-image" type="button" style="margin-right:8px; background:#00ff88; color:#222; border-radius:6px; padding:7px 18px; font-weight:700;">📋 Copy QR Image</button>
+                <a id="download-qr-image" href="data:image/png;base64,{{ qr_img_base64 }}" download="qr_code.png" style="margin-right:8px; background:#ffd700; color:#222; border-radius:6px; padding:7px 18px; font-weight:700; text-decoration:none;">⬇️ Download QR Image</a>
+                <button id="share-qr-image" type="button" style="background:#2196f3; color:#fff; border-radius:6px; padding:7px 18px; font-weight:700;">🔗 Share QR Image</button>
+                <div style="font-size:0.98em; color:#ffd600; margin-top:7px;">You can copy, download, or use your device's share menu to send the QR image via WhatsApp, Gmail, etc.</div>
             </div>
         </div>
         {% endif %}
@@ -789,7 +799,7 @@
         };
     }
     // Feature 9: Accessibility (Read QR Content, moved to after QR generation)
-    const readBtn = document.getElementById('read-qr-text');
+    const readBtn = document.getElementById('read-qr-btn');
     const qrDesc = document.getElementById('qr-desc');
     if (readBtn) {
         readBtn.onclick = function() {
@@ -799,6 +809,69 @@
                 const utter = new SpeechSynthesisUtterance(text);
                 window.speechSynthesis.speak(utter);
             }
+        };
+    }
+    // Accessibility: Read QR Content (single QR)
+    const readQrBtn = document.getElementById('read-qr-content');
+    if (readQrBtn) {
+        readQrBtn.onclick = function() {
+            // Find the closest .qr-text above the button
+            let text = '';
+            let parent = readQrBtn.parentElement;
+            while (parent && !text) {
+                const qrText = parent.querySelector('.qr-text');
+                if (qrText) text = qrText.textContent;
+                parent = parent.parentElement;
+            }
+            if (!text) {
+                // fallback: try global
+                const fallback = document.querySelector('.qr-text');
+                if (fallback) text = fallback.textContent;
+            }
+            if ('speechSynthesis' in window && text) {
+                window.speechSynthesis.cancel();
+                const utter = new window.SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utter);
+            }
+        };
+    }
+    // Share QR Image (Clipboard API and Web Share API)
+    const copyQrBtn = document.getElementById('copy-qr-image');
+    const shareQrBtn = document.getElementById('share-qr-image');
+    const qrImg = document.getElementById('qr-img');
+    if (copyQrBtn && qrImg) {
+        copyQrBtn.onclick = async function() {
+            try {
+                const response = await fetch(qrImg.src);
+                const blob = await response.blob();
+                await navigator.clipboard.write([
+                    new window.ClipboardItem({ [blob.type]: blob })
+                ]);
+                copyQrBtn.textContent = '✅ Copied!';
+                setTimeout(()=>{copyQrBtn.textContent='📋 Copy QR Image';}, 2000);
+            } catch (e) {
+                alert('Copy failed: ' + e);
+            }
+        };
+    }
+    if (shareQrBtn && qrImg && navigator.canShare) {
+        shareQrBtn.onclick = async function() {
+            try {
+                const response = await fetch(qrImg.src);
+                const blob = await response.blob();
+                const file = new File([blob], 'qr_code.png', { type: blob.type });
+                await navigator.share({
+                    files: [file],
+                    title: 'QR Code',
+                    text: 'Scan this QR code!'
+                });
+            } catch (e) {
+                alert('Share failed: ' + e);
+            }
+        };
+    } else if (shareQrBtn) {
+        shareQrBtn.onclick = function() {
+            alert('Sharing images is supported on most mobile browsers. If unavailable, use Download or Copy.');
         };
     }
     </script>

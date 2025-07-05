@@ -6,9 +6,10 @@ from PIL import Image
 import os
 import re
 import requests
+from pyzbar.pyzbar import decode
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # You can set a random secret key
+app.secret_key = os.environ.get('SECRET_KEY', os.urandom(24))
 
 NATURE_LABELS = [
     ("Sky", "#87ceeb"),
@@ -59,11 +60,19 @@ def generate_qr():
                     img.save(img_io, 'PNG')
                     img_io.seek(0)
                     qr_img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+                    # Trust check for each QR
+                    trust_result = None
+                    is_url = re.match(r'^https?://', text.strip())
+                    if is_url:
+                        trust_result = check_url_trust(text.strip())
+                    else:
+                        trust_result = {'score': 'safe', 'icon': '✅', 'reason': 'No issues detected', 'url': text.strip()}
                     multi_qr_results.append({
                         'label': label,
                         'color': color,
                         'text': text,
-                        'qr_img': qr_img_base64
+                        'qr_img': qr_img_base64,
+                        'trust_result': trust_result
                     })
             return render_template('index.html', multi_qr_results=multi_qr_results, nature_labels=NATURE_LABELS)
         else:
@@ -74,18 +83,8 @@ def generate_qr():
             is_url = re.match(r'^https?://', data.strip())
             if is_url:
                 trust_result = check_url_trust(data.strip())
-                # If dangerous or suspicious, require user confirmation
-                if trust_result['score'] in ['dangerous', 'suspicious'] and not request.form.get('trust_override'):
-                    return render_template('index.html',
-                        trust_result=trust_result,
-                        text=data,
-                        qr_img_base64=None,
-                        nature_labels=NATURE_LABELS,
-                        qr_color=qr_color,
-                        bg_color=bg_color,
-                        show_trust_modal=True
-                    )
-            # Style: for now, only color is supported, but can be extended
+            else:
+                trust_result = {'score': 'safe', 'icon': '✅', 'reason': 'No issues detected', 'url': data.strip()}
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.constants.ERROR_CORRECT_H,
@@ -95,7 +94,6 @@ def generate_qr():
             qr.add_data(data)
             qr.make(fit=True)
             img = qr.make_image(fill_color=qr_color, back_color=bg_color).convert("RGBA")
-            # Logo embedding
             if 'logo' in request.files and request.files['logo'].filename:
                 logo_file = request.files['logo']
                 img = embed_logo(img, logo_file)
@@ -103,9 +101,24 @@ def generate_qr():
             img.save(img_io, 'PNG')
             img_io.seek(0)
             qr_img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+            # --- Backend QR decode for verification ---
+            img_io.seek(0)
+            decoded_data = None
+            try:
+                decoded = decode(Image.open(img_io))
+                if decoded:
+                    decoded_data = decoded[0].data.decode('utf-8')
+            except Exception:
+                decoded_data = None
+            # Re-run trust check on decoded data if it's a URL
+            decoded_trust_result = None
+            if decoded_data and re.match(r'^https?://', decoded_data.strip()):
+                decoded_trust_result = check_url_trust(decoded_data.strip())
             return render_template('index.html',
                 qr_img_base64=qr_img_base64,
                 text=data,
+                decoded_data=decoded_data,
+                decoded_trust_result=decoded_trust_result,
                 nature_labels=NATURE_LABELS,
                 qr_color=qr_color,
                 bg_color=bg_color,
@@ -187,4 +200,4 @@ def check_url_trust(url):
     return {'score': score, 'icon': icon, 'reason': ', '.join(reason) or 'No issues detected', 'url': url}
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)

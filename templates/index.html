@@ -482,9 +482,19 @@
                 <div class="qr-label-badge">{{ qr.label }}</div>
                 <img class="qr-img-glow" src="data:image/png;base64,{{ qr.qr_img }}" alt="QR Code" style="max-width: 100%; padding: 10px; border-radius: 10px; border: 2px solid {{ qr.color }};" />
                 <div class="qr-text">{{ qr.text }}</div>
+                <div style="margin: 10px 0;">
+                  {% set trust_color = 'lime' if qr.trust_result.score=='safe' else ('#ffd600' if qr.trust_result.score=='suspicious' else '#ff1744') %}
+                  <span title="{{ qr.trust_result.reason }}" style="font-size:1.3em; color:{{ trust_color }}; filter: drop-shadow(0 0 6px {{ trust_color }}); cursor: pointer; vertical-align:middle;">{{ qr.trust_result.icon }}</span>
+                  <span style="color:#00ff88; font-size:0.98em; margin-left:8px;">{{ qr.trust_result.score|capitalize }}</span>
+                  <span style="color:#ffd600; font-size:0.93em; margin-left:8px;">{{ qr.trust_result.reason }}</span>
+                </div>
+                {% if qr.trust_result.score == 'safe' %}
                 <a href="data:image/png;base64,{{ qr.qr_img }}" download="qr_code_{{ qr.label|lower }}.png">
                     <button type="button" class="qr-download-btn">Download</button>
                 </a>
+                {% else %}
+                <button type="button" class="qr-download-btn" disabled style="opacity:0.5; cursor:not-allowed;">Download (Unsafe)</button>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -492,10 +502,19 @@
         {% if qr_img_base64 %}
         <div style="margin-top: 25px;">
             <img id="qr-img" class="qr-animated" src="data:image/png;base64,{{ qr_img_base64 }}" alt="QR Code" style="max-width: 100%; background: white; padding: 10px; border-radius: 8px; animation: qrFadeIn 1s cubic-bezier(.4,2,.6,1);" />
-            <br>
+            <div style="margin: 10px 0;">
+              {% set trust_color = 'lime' if trust_result.score=='safe' else ('#ffd600' if trust_result.score=='suspicious' else '#ff1744') %}
+              <span title="{{ trust_result.reason }}" style="font-size:1.3em; color:{{ trust_color }}; filter: drop-shadow(0 0 6px {{ trust_color }}); cursor: pointer; vertical-align:middle;">{{ trust_result.icon }}</span>
+              <span style="color:#00ff88; font-size:0.98em; margin-left:8px;">{{ trust_result.score|capitalize }}</span>
+              <span style="color:#ffd600; font-size:0.93em; margin-left:8px;">{{ trust_result.reason }}</span>
+            </div>
+            {% if trust_result.score == 'safe' %}
             <a id="download-btn" href="data:image/png;base64,{{ qr_img_base64 }}" download="qr_code.png">
                 <button type="button" style="margin-top: 15px;">Download</button>
             </a>
+            {% else %}
+            <button type="button" style="margin-top: 15px; opacity:0.5; cursor:not-allowed;" disabled>Download (Unsafe)</button>
+            {% endif %}
             <!-- Accessibility: Read QR Content -->
             <div style="margin-top:18px;">
                 <button type="button" id="read-qr-text" data-qr-content="{{ text }}">🔊 Read QR Content</button>

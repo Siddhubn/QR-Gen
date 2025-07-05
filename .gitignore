@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment
+.env
+.env.*
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Images/QRs (if you ever save them)
+*.png
+*.jpg
+*.jpeg
+
+# Logs
+*.log
+
+# Other
+*.sqlite3
+instance/
+
+# Node/npm (if ever used)
+node_modules/
+
+# Render/Cloud
+*.bak
+
+# Ignore backup files
+*~

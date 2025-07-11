@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRglyph - Camera QR Verification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        #video { width: 320px; border-radius: 12px; box-shadow: 0 0 10px #00ff00; background: #111; }
+        #canvas { display: none; }
+        .qr-card { background: rgba(20,40,20,0.9); border-radius: 16px; box-shadow: 0 0 20px #00ff00aa; padding: 1.5rem; margin: 1rem auto; min-width: 260px; max-width: 340px; text-align: center; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a>
+        <a href="/multi" class="{% if request.path.startswith('/multi') %}active{% endif %}">Multi</a>
+        <a href="/verify" class="{% if request.path == '/verify' %}active{% endif %}">Image</a>
+        <a href="/verify/camera" class="{% if request.path == '/verify/camera' %}active{% endif %}">Camera</a>
+    </nav>
+    <div class="container">
+        <h1>Camera QR Verification</h1>
+        <div id="camera-section">
+            <video id="video" autoplay></video>
+            <canvas id="canvas" width="320" height="240"></canvas>
+            <div style="margin-top:1em;">
+                <button id="scan-btn">Scan QR</button>
+            </div>
+            <form id="qr-form" method="POST" style="display:none;">
+                <input type="hidden" id="qr-content" name="qr-content">
+            </form>
+            <div id="scan-result" style="margin-top:1em;"></div>
+        </div>
+        {% if result %}
+            {% if result.error %}
+                <div class="warning" style="color: #ff0033; font-weight: bold; margin-top:1em;">{{ result.error }}</div>
+            {% else %}
+                <div class="qr-card" style="margin-top:2em;">
+                    <div class="trust-score trust-{{ result.trust.score }}">
+                        <span style="font-size: 2rem;">{{ result.trust.icon }}</span>
+                        <strong>{{ result.trust.score|capitalize }}</strong>
+                        <ul>
+                        {% for reason in result.trust.reasons %}
+                            <li>{{ result.trust.reasons[loop.index0] }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="qr-decoded">
+                        <strong>Decoded Content:</strong>
+                        <pre style="background: #111; color: #0f0; padding: 0.5em; border-radius: 8px;">{{ result.decoded }}</pre>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+        <div style="margin-top:2em;"><a href="/verify">← Upload QR</a> | <a href="/">Single QR</a> | <a href="/multi">Multi QR</a></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script>
+    // Camera and QR scan logic
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const scanBtn = document.getElementById('scan-btn');
+    const qrForm = document.getElementById('qr-form');
+    const qrContentInput = document.getElementById('qr-content');
+    const scanResult = document.getElementById('scan-result');
+
+    // Start camera
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(function(stream) {
+                video.srcObject = stream;
+                video.play();
+            })
+            .catch(function(err) {
+                scanResult.innerHTML = '<span style="color:#ff0033">Camera access denied or not available.</span>';
+            });
+    } else {
+        scanResult.innerHTML = '<span style="color:#ff0033">Camera not supported in this browser.</span>';
+    }
+
+    scanBtn.onclick = function() {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (code) {
+            qrContentInput.value = code.data;
+            qrForm.submit();
+        } else {
+            scanResult.innerHTML = '<span style="color:#ff0033">No QR code detected. Try again.</span>';
+        }
+    };
+    </script>
+</body>
+</html>

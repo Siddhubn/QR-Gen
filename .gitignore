@@ -4,7 +4,7 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Environment
+# Env
 .env
 .env.*
 
@@ -15,23 +15,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Images/QRs (if you ever save them)
+# QR Images
 *.png
 *.jpg
 *.jpeg
-
-# Logs
-*.log
-
-# Other
-*.sqlite3
-instance/
-
-# Node/npm (if ever used)
-node_modules/
-
-# Render/Cloud
-*.bak
-
-# Ignore backup files
-*~
+*.svg

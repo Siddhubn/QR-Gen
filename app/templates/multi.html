@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRglyph - Multi QR Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .multi-grid { display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; }
+        .qr-card { background: rgba(20,40,20,0.9); border-radius: 16px; box-shadow: 0 0 20px #00ff00aa; padding: 1.5rem; margin: 1rem; min-width: 260px; max-width: 320px; text-align: center; }
+        .qr-card img { max-width: 180px; background: #fff; border-radius: 10px; box-shadow: 0 0 8px #00ff00; }
+        .qr-controls button, .qr-controls a button { margin: 0.3em 0.2em; }
+        .qr-label { font-weight: bold; font-size: 1.2em; margin-bottom: 0.5em; color: #0f0; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a>
+        <a href="/multi" class="{% if request.path.startswith('/multi') %}active{% endif %}">Multi</a>
+        <a href="/verify" class="{% if request.path == '/verify' %}active{% endif %}">Image</a>
+        <a href="/verify/camera" class="{% if request.path == '/verify/camera' %}active{% endif %}">Camera</a>
+    </nav>
+    <div class="container">
+        <h1>Multi QR Generator</h1>
+        <form method="POST" enctype="multipart/form-data" id="multi-form">
+            <div style="margin-bottom:1em;">
+                <label for="num_qrs" style="font-weight:bold;">Number of QRs to generate (1-10):</label>
+                <select id="num_qrs" name="num_qrs" style="font-size:1.1em; padding:0.3em 1em; border-radius:8px; margin-left:0.5em;">
+                    {% for n in range(1, 11) %}
+                        <option value="{{n}}" {% if form_data and form_data|length == n %}selected{% endif %}>{{n}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center;" id="qr-inputs">
+                {% set num = form_data|length if form_data else 1 %}
+                {% for i in range(num) %}
+                <div style="background: #111; border-radius: 10px; padding: 1em; min-width: 220px;">
+                    <label>Label:
+                        <input type="text" name="label_{{i+1}}" value="{{ form_data[i]['label'] }}" style="width: 90%;">
+                    </label><br>
+                    <label>Text/URL:
+                        <input type="text" name="qr-content_{{i+1}}" value="{{ form_data[i]['qr-content'] }}" style="width: 90%;">
+                    </label><br>
+                    <label>Color:
+                        <input type="color" name="qr-color_{{i+1}}" value="{{ form_data[i]['qr-color'] }}">
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <button type="submit" style="margin-top: 1.5em;">Generate All</button>
+        </form>
+        <script>
+        // Dynamically update number of QR input blocks
+        document.getElementById('num_qrs').addEventListener('change', function() {
+            const n = parseInt(this.value);
+            const form = document.getElementById('multi-form');
+            // Remove all but num_qrs hidden inputs
+            for (let i = form.elements.length - 1; i >= 0; i--) {
+                const el = form.elements[i];
+                if (el.name && (el.name.startsWith('label_') || el.name.startsWith('qr-content_') || el.name.startsWith('qr-color_')))
+                    el.value = '';
+            }
+            form.submit();
+        });
+        </script>
+        {% if qr_results %}
+        <div class="multi-grid" style="margin-top:2em;">
+            {% for qr in qr_results %}
+            <div class="qr-card">
+                <div class="qr-label">{{ qr.label }}</div>
+                <img src="data:image/png;base64,{{ qr.qr_image }}" alt="QR Code">
+                <div class="trust-score trust-{{ qr.trust.score }}">
+                    <span style="font-size: 1.5rem;">{{ qr.trust.icon }}</span>
+                    <strong>{{ qr.trust.score|capitalize }}</strong>
+                    <ul>
+                    {% for reason in qr.trust.reasons %}
+                        <li>{{ reason }}</li>
+                    {% endfor %}
+                    </ul>
+                    <button type="button" class="collapse-btn" onclick="toggleDetails('trust-details-{{ loop.index0 }}')" style="margin-top:0.5em;">
+                        <span id="arrow-trust-details-{{ loop.index0 }}">▼</span> Show Details
+                    </button>
+                    <div id="trust-details-{{ loop.index0 }}" class="trust-details-collapsible" style="display:none;">
+                        <pre style="text-align:left;overflow-x:auto;max-width:100%;background:#181; color:#fff; border-radius:8px; padding:0.7em; font-size:0.95em; margin-top:0.5em;">
+{{ qr.trust.details | default({}) | tojson(indent=2) }}
+                        </pre>
+                    </div>
+                </div>
+                {% if qr.trust.score != 'safe' %}
+                    <div class="warning" style="color: #ff0033; font-weight: bold;">Warning: Download disabled.</div>
+                {% endif %}
+                <div class="qr-controls">
+                    <button onclick="readQRContent('{{ qr['qr-content']|e }}')">🔊 Read</button>
+                    <button onclick="shareQR('{{ qr.qr_image }}', '{{ qr.decoded|e }}')">📤 Share</button>
+                    <a href="data:image/png;base64,{{ qr.qr_image }}" download="{{ qr.label|replace(' ','_') }}.png">
+                        <button {% if qr.trust.score != 'safe' %}disabled{% endif %}>⬇️ Download</button>
+                    </a>
+                </div>
+                <div class="qr-decoded">
+                    <strong>Decoded:</strong>
+                    <pre style="background: #111; color: #0f0; padding: 0.5em; border-radius: 8px;">{{ qr.decoded }}</pre>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div style="margin-top:2em;"><a href="/">← Single QR Generator</a></div>
+    </div>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+<script>
+function toggleDetails(id) {
+    var el = document.getElementById(id);
+    var arrow = document.getElementById('arrow-' + id);
+    if (el.style.display === 'none') {
+        el.style.display = 'block';
+        arrow.textContent = '▲';
+    } else {
+        el.style.display = 'none';
+        arrow.textContent = '▼';
+    }
+}
+</script>
+</body>
+</html>

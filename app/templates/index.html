@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRglyph - QR Code Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a>
+        <a href="/multi" class="{% if request.path.startswith('/multi') %}active{% endif %}">Multi</a>
+        <a href="/verify" class="{% if request.path == '/verify' %}active{% endif %}">Image</a>
+        <a href="/verify/camera" class="{% if request.path == '/verify/camera' %}active{% endif %}">Camera</a>
+    </nav>
+    <div class="container">
+        <h1>QRglyph</h1>
+        <form id="qr-form" method="POST" enctype="multipart/form-data">
+            <label for="qr-content">Text or URL:</label>
+            <input type="text" id="qr-content" name="qr-content" required value="{{ form_data['qr-content'] if form_data else '' }}">
+            <label for="qr-color">QR Color:</label>
+            <input type="color" id="qr-color" name="qr-color" value="{{ form_data['qr-color'] if form_data else '#00ff00' }}">
+            <label for="bg-color">Background Color:</label>
+            <input type="color" id="bg-color" name="bg-color" value="{{ form_data['bg-color'] if form_data else '#000000' }}">
+            <label for="logo">Embed Logo (optional):</label>
+            <input type="file" id="logo" name="logo" accept="image/*">
+            <button type="submit">Generate QR</button>
+        </form>
+        <div id="qr-result">
+            {% if qr_image %}
+                <div class="qr-card">
+                    <img src="data:image/png;base64,{{ qr_image }}" alt="QR Code" style="max-width: 250px; background: #fff; border-radius: 12px; box-shadow: 0 0 10px #00ff00;">
+                    <div class="trust-score trust-{{ trust.score }}">
+                        <span style="font-size: 2rem;">{{ trust.icon }}</span>
+                        <strong>{{ trust.score|capitalize }}</strong>
+                        <ul>
+                        {% for reason in trust.reasons %}
+                            <li>{{ reason }}</li>
+                        {% endfor %}
+                        </ul>
+                        <button type="button" class="collapse-btn" onclick="toggleDetails('trust-details')" style="margin-top:0.5em;">
+                            <span id="arrow-trust-details">▼</span> Show Details
+                        </button>
+                        <div id="trust-details" class="trust-details-collapsible" style="display:none;">
+                            <pre style="text-align:left;overflow-x:auto;max-width:100%;background:#181; color:#fff; border-radius:8px; padding:0.7em; font-size:0.95em; margin-top:0.5em;">
+{{ trust.details | default({}) | tojson(indent=2) }}
+                            </pre>
+                        </div>
+                    </div>
+                    {% if trust.score != 'safe' %}
+                        <div class="warning" style="color: #ff0033; font-weight: bold;">Warning: This QR may be unsafe. Download disabled.</div>
+                    {% endif %}
+                    <div class="qr-controls">
+                        <button onclick='readQRContent("{{ form_data["qr-content"]|e }}")'>🔊 Read QR Content</button>
+                        <button onclick="shareQR('{{ qr_image }}', '{{ decoded|e }}')">📤 Share</button>
+                        <a href="data:image/png;base64,{{ qr_image }}" download="qrglyph.png">
+                            <button {% if trust.score != 'safe' %}disabled{% endif %}>⬇️ Download</button>
+                        </a>
+                    </div>
+                    <div class="qr-decoded">
+                        <strong>Decoded Content:</strong>
+                        <pre style="background: #111; color: #0f0; padding: 0.5em; border-radius: 8px;">{{ decoded }}</pre>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</div>
+<script>
+function toggleDetails(id) {
+    var el = document.getElementById(id);
+    var arrow = document.getElementById('arrow-' + id);
+    if (el.style.display === 'none') {
+        el.style.display = 'block';
+        arrow.textContent = '▲';
+    } else {
+        el.style.display = 'none';
+        arrow.textContent = '▼';
+    }
+}
+</script>
+</body>
+</html>

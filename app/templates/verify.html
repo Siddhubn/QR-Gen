@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRglyph - Verify QR</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .qr-card { background: rgba(20,40,20,0.9); border-radius: 16px; box-shadow: 0 0 20px #00ff00aa; padding: 1.5rem; margin: 1rem auto; min-width: 260px; max-width: 340px; text-align: center; }
+        .qr-card img { max-width: 180px; background: #fff; border-radius: 10px; box-shadow: 0 0 8px #00ff00; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a>
+        <a href="/multi" class="{% if request.path.startswith('/multi') %}active{% endif %}">Multi</a>
+        <a href="/verify" class="{% if request.path == '/verify' %}active{% endif %}">Image</a>
+        <a href="/verify/camera" class="{% if request.path == '/verify/camera' %}active{% endif %}">Camera</a>
+    </nav>
+    <div class="container">
+        <h1>Verify QR</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <label for="qr-image">Upload QR Image:</label>
+            <input type="file" id="qr-image" name="qr-image" accept="image/*" required>
+            <button type="submit">Verify</button>
+        </form>
+        {% if result %}
+            {% if result.error %}
+                <div class="warning" style="color: #ff0033; font-weight: bold; margin-top:1em;">{{ result.error }}</div>
+            {% else %}
+                <div class="qr-card" style="margin-top:2em;">
+                    <img src="data:image/png;base64,{{ result.qr_image }}" alt="QR Code">
+                    <div class="trust-score trust-{{ result.trust.score }}">
+                        <span style="font-size: 2rem;">{{ result.trust.icon }}</span>
+                        <strong>{{ result.trust.score|capitalize }}</strong>
+                        <ul>
+                        {% for reason in result.trust.reasons %}
+                            <li>{{ reason }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="qr-decoded">
+                        <strong>Decoded Content:</strong>
+                        <pre style="background: #111; color: #0f0; padding: 0.5em; border-radius: 8px;">{{ result.decoded }}</pre>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+        <div style="margin-top:2em;"><a href="/">← Single QR Generator</a> | <a href="/multi">Multi QR</a></div>
+    </div>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

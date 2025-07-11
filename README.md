@@ -1,57 +1,65 @@
-# QR Code Generator - Flask App
+# QRglyph
 
-## Overview
-This Flask application allows users to generate **QR codes** from text input. The user enters text into a web form, and upon submission, a **QR code image is generated and downloaded**.
+A modular, production-ready Flask web application for generating, decoding, and verifying QR codes with anti-scam trust checks.
 
 ## Features
-- Simple **Flask-based web app** with a user-friendly interface.
-- Generates **QR codes dynamically** using the `qrcode` library.
-- Users can **download** the generated QR code as a PNG image.
-- **Modern UI** with a dark-themed design and animated background elements.
+- Single and multi QR generation with color and logo options
+- QR decoding and anti-scam trust check (pattern-based, shortener expansion, Google Safe Browsing)
+- QR verification via upload or camera
+- Modern, hacker-inspired UI (responsive, accessible)
+- Text-to-speech and sharing options for QR content
+- Secure: uses environment variables for secrets
+- Production-ready: Gunicorn, requirements.txt, render.yaml
 
-## Prerequisites
-Ensure you have Python and the required libraries installed:
-```bash
-pip install flask qrcode
-```
+## Setup
+1. **Clone the repo:**
+   ```bash
+   git clone https://github.com/Siddhubn/QR-Gen.git
+   cd QR-Gen
+   ```
+2. **Create a virtual environment and install dependencies:**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+3. **Configure environment variables:**
+   - Copy `.env.example` to `.env` and set your `SECRET_KEY` (and `GSB_API_KEY` if available).
+
+4. **Run locally:**
+   ```bash
+   flask run
+   # or
+   python app.py
+   ```
+
+5. **Production (Gunicorn):**
+   ```bash
+   gunicorn -w 4 -b 0.0.0.0:10000 app:app
+   ```
+
+6. **Deploy on Render:**
+   - Use the included `render.yaml` for one-click deployment.
 
 ## Project Structure
 ```
-QR_Code_Gen/
-├── LICENSE
-├── README.md
-├── __pycache__
-    └── app.cpython-312.pyc
+QR-Gen/
+├── app/
+│   ├── __init__.py
+│   ├── routes.py
+│   ├── utils.py
+│   ├── templates/
+│   │   └── index.html
+│   └── static/
+│       ├── style.css
+│       └── main.js
 ├── app.py
 ├── requirements.txt
-├── templates
-    └── index.html
-└── venv
-    ├── Lib
-        └── site-packages
-    ├── Scripts
- 
-    └── pyvenv.cfg
-
+├── .env.example
+├── .gitignore
+├── render.yaml
+└── README.md
 ```
 
-## Usage
-1. Run the Flask application:
-   ```bash
-   python app.py
-   ```
-2. Open your browser and go to `http://127.0.0.1:5000/`.
-3. Enter text and click **Generate QR Code**.
-4. The QR code will be generated and downloaded automatically.
-
-## Issues & Improvements
-- **Security Enhancement**: Currently, there is no input validation. It is recommended to add validation and sanitization for user input.
-- **Customization Options**: Allow users to select **QR code colors, sizes, or formats**.
-- **Real-time QR Preview**: Display the QR code on the webpage before downloading.
-
-## Contributions
-Feel free to contribute by adding features, fixing bugs, or improving UI elements.
-
 ## License
-This project is open-source under the MIT License.
-
+MIT

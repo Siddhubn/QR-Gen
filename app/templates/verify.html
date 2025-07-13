@@ -6,6 +6,24 @@
     <title>QRglyph - Verify QR</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
+      /* Unique neon-glow hyperlink styling */
+      a, a:visited {
+        color: #00ff99;
+        text-decoration: none;
+        font-weight: bold;
+        border-bottom: 2px solid #00ff99cc;
+        box-shadow: 0 2px 10px #00ff99aa;
+        transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        border-radius: 3px;
+        padding: 0 0.1em;
+      }
+      a:hover, a:focus {
+        color: #111;
+        background: #00ff99;
+        border-bottom: 2px solid #fff;
+        box-shadow: 0 0 18px #00ff99, 0 0 2px #fff;
+        text-shadow: 0 0 6px #00ff99, 0 0 2px #fff;
+      }
       /* Custom file input styling */
       input[type="file"]::-webkit-file-upload-button {
         background: #00ff00;
@@ -130,5 +148,24 @@
         <div style="margin-top:2em;"><a href="/">← Single QR Generator</a> | <a href="/multi">Multi QR</a></div>
     </div>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
+<script>
+// Share QR code for the user-provided content, not the decoded result
+function shareQR(qrImage, userContent) {
+    if (navigator.share) {
+        fetch('data:image/png;base64,' + qrImage)
+            .then(res => res.blob())
+            .then(blob => {
+                const file = new File([blob], 'qrglyph.png', { type: 'image/png' });
+                navigator.share({
+                    title: 'QRglyph',
+                    text: 'Scan this QR for: ' + userContent,
+                    files: [file]
+                });
+            });
+    } else {
+        alert('Sharing is not supported on this device/browser.');
+    }
+}
+</script>
 </body>
 </html>

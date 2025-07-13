@@ -71,13 +71,16 @@ def multi_qr():
                 buf.seek(0)
                 img_b64 = base64.b64encode(buf.read()).decode('utf-8')
                 decoded = decode_qr(img)
+                if not decoded:
+                    decoded = data
                 trust = trust_check(decoded or '')
                 qr_results.append({
                     'label': label,
                     'qr_image': img_b64,
                     'decoded': decoded,
                     'trust': trust,
-                    'color': color
+                    'color': color,
+                    'qr-content': data
                 })
         while len(form_data) < num_qrs:
             form_data.append({'label': f'QR {len(form_data)+1}', 'qr-content': '', 'qr-color': '#00ff00'})
@@ -96,6 +99,8 @@ def verify_qr():
             try:
                 img = Image.open(qr_file.stream)
                 decoded = decode_qr(img)
+                if not decoded:
+                    decoded = ''
                 trust = trust_check(decoded or '')
                 buf = io.BytesIO()
                 img.save(buf, format='PNG')

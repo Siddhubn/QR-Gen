@@ -20,14 +20,20 @@ def index():
         logo_file = request.files.get('logo')
         logo_img = None
         if logo_file and logo_file.filename:
-            logo_img = Image.open(logo_file.stream)
-        img = generate_qr(data, fill_color=fill_color, back_color=back_color, logo_path=None if not logo_img else logo_img)
+            try:
+                logo_img = Image.open(logo_file.stream)
+            except Exception:
+                logo_img = None
+        img = generate_qr(data, fill_color=fill_color, back_color=back_color, logo_path=logo_img)
         buf = io.BytesIO()
         img.save(buf, format='PNG')
         buf.seek(0)
         img_b64 = base64.b64encode(buf.read()).decode('utf-8')
         decoded = decode_qr(img)
-        trust = trust_check(decoded or '', gsb_api_key=current_app.config.get('GSB_API_KEY'))
+        # If decode_qr fails, use the original data for trust check and display
+        if not decoded:
+            decoded = data
+        trust = trust_check(decoded or '')
         return render_template('index.html',
             qr_image=img_b64,
             decoded=decoded,
@@ -38,7 +44,8 @@ def index():
                 'bg-color': back_color
             }
         )
-    return render_template('index.html')
+    # On GET, do not pass any QR data (clears previous result)
+    return render_template('index.html', qr_image=None, decoded=None, trust=None, form_data=None)
 
 # Multi QR Generation Route
 @main_bp.route('/multi', methods=['GET', 'POST'])
@@ -64,7 +71,7 @@ def multi_qr():
                 buf.seek(0)
                 img_b64 = base64.b64encode(buf.read()).decode('utf-8')
                 decoded = decode_qr(img)
-                trust = trust_check(decoded or '', gsb_api_key=current_app.config.get('GSB_API_KEY'))
+                trust = trust_check(decoded or '')
                 qr_results.append({
                     'label': label,
                     'qr_image': img_b64,
@@ -89,7 +96,7 @@ def verify_qr():
             try:
                 img = Image.open(qr_file.stream)
                 decoded = decode_qr(img)
-                trust = trust_check(decoded or '', gsb_api_key=current_app.config.get('GSB_API_KEY'))
+                trust = trust_check(decoded or '')
                 buf = io.BytesIO()
                 img.save(buf, format='PNG')
                 buf.seek(0)
@@ -112,7 +119,7 @@ def verify_camera():
     if request.method == 'POST':
         qr_content = request.form.get('qr-content')
         if qr_content:
-            trust = trust_check(qr_content, gsb_api_key=current_app.config.get('GSB_API_KEY'))
+            trust = trust_check(qr_content)
             result = {
                 'decoded': qr_content,
                 'trust': trust

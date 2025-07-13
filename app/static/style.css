@@ -1,3 +1,24 @@
+body {
+  min-height: 100vh;
+  min-width: 100vw;
+  background: url('/static/bg-green-bokeh.jpg') no-repeat center center fixed;
+  background-size: cover;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 30, 20, 0.72);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.container, .navbar, .qr-card, .multi-grid, form, .trust-score, .qr-controls, .qr-decoded, .warning {
+  position: relative;
+  z-index: 1;
+}
 
 /* Navigation bar styles */
 .navbar {
